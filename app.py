@@ -4,17 +4,14 @@ from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 import os
 
-# --- 1. KONFIGURASI ---
+#KONFIGURASI
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1Vr8LdlC2COe-zqPKFyrtqMvGFUF3XbjhaOlfkGO-oz0/edit?usp=sharing"
 LOGO_FILE = "logo_sekolah.png"
 
-# --- UBAH INI UNTUK MENUTUP LINK ---
-FORM_TERBUKA = False  # Ubah ke False untuk menutup link, True untuk membuka kembali
-# ----------------------------------
+FORM_TERBUKA = False  # Ubah ke True untuk buka kembali
 
 st.set_page_config(page_title="Verifikasi Data TKA", layout="centered")
 
-# --- 2. STYLE TOMBOL (BIRU NEON SOFT) ---
 st.markdown("""
     <style>
     div.stButton > button:first-child {
@@ -31,7 +28,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. KONEKSI DATA ---
+#KONEKSI_DATA
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 def muat_data_bersih():
@@ -40,8 +37,7 @@ def muat_data_bersih():
     df.columns = [str(c).strip().lower().replace(" ", "_") for c in df.columns]
     df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
     return df
-
-# --- 4. HEADER (DENGAN LOGO) ---
+    
 col_logo, col_judul = st.columns([1, 5])
 with col_logo:
     if os.path.exists(LOGO_FILE):
@@ -58,8 +54,8 @@ st.divider()
 
 # --- 5. LOGIKA PENUTUPAN LINK ---
 if not FORM_TERBUKA:
-    st.error("### 🛑 PEMBERITAHUAN: VERIFIKASI DITUTUP")
-    st.write("Masa verifikasi data TKA 2025 telah berakhir karena kuota responden telah terpenuhi 100%. Terima kasih atas partisipasi Anda.")
+    st.error("### PEMBERITAHUAN: VERIFIKASI DITUTUP")
+    st.write("Masa pengecekan data TKA 2025 telah berakhir, hubungi operator sekolah jika masih ada data yang salah. Terima kasih.")
     
     # Panel Admin tetap bisa dibuka meski form ditutup (untuk download hasil akhir)
     with st.expander("Panel Admin"):
@@ -72,13 +68,13 @@ if not FORM_TERBUKA:
             st.download_button("Download Rekap Akhir (CSV)", csv, "rekap_tka_final.csv", "text/csv")
     st.stop() # Menghentikan proses kode di bawahnya agar form login tidak muncul
 
-# --- 6. LOGIN (SIDEBAR) ---
+#LOGIN_SISWA
 with st.sidebar:
     st.header("Login Siswa")
     input_nis = st.text_input("Masukkan NIS").strip()
     input_tgl = st.text_input("Tanggal Lahir (YYYY-MM-DD)", placeholder="Contoh: 2008-05-10").strip()
 
-# --- 7. AREA VERIFIKASI ---
+#VERIFIKASI
 if input_nis and input_tgl:
     df_siswa = muat_data_bersih()
     
@@ -128,10 +124,11 @@ if input_nis and input_tgl:
     else:
         st.error("Data tidak ditemukan. Cek NIS & format tanggal (YYYY-MM-DD).")
 
-# --- 8. PANEL ADMIN (JIKA FORM MASIH TERBUKA) ---
+#PANEL ADMIN
 st.write("")
 with st.expander("Panel Admin"):
     pw = st.text_input("Password Admin", type="password", key="pw_bawah")
     if pw == "admin123":
         df_admin = muat_data_bersih()
         st.dataframe(df_admin)
+
