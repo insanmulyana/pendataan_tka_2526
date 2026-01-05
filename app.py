@@ -5,9 +5,12 @@ from streamlit_gsheets import GSheetsConnection
 import os
 
 # --- 1. KONFIGURASI ---
-# GANTI LINK INI DENGAN LINK GOOGLE SHEETS ANDA
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1Vr8LdlC2COe-zqPKFyrtqMvGFUF3XbjhaOlfkGO-oz0/edit?usp=sharing"
 LOGO_FILE = "logo_sekolah.png"
+
+# --- UBAH INI UNTUK MENUTUP LINK ---
+FORM_TERBUKA = False  # Ubah ke False untuk menutup link, True untuk membuka kembali
+# ----------------------------------
 
 st.set_page_config(page_title="Verifikasi Data TKA", layout="centered")
 
@@ -15,7 +18,7 @@ st.set_page_config(page_title="Verifikasi Data TKA", layout="centered")
 st.markdown("""
     <style>
     div.stButton > button:first-child {
-        background-color: #28a745; /* Biru Neon Soft */
+        background-color: #28a745; 
         color: white;
         border-radius: 8px;
         border: none;
@@ -24,8 +27,7 @@ st.markdown("""
         transition: 0.3s;
         width: 100%;
     }
-    div.stButton > button:first-child:hover { background-color: #008fb3;
-    color: white; }
+    div.stButton > button:first-child:hover { background-color: #008fb3; color: white; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -34,10 +36,8 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 
 def muat_data_bersih():
     st.cache_data.clear()
-    # Membaca semua data sebagai string agar format NIS & Tgl tidak berubah
     df = conn.read(spreadsheet=SHEET_URL, dtype=str)
     df.columns = [str(c).strip().lower().replace(" ", "_") for c in df.columns]
-    # Bersihkan spasi liar di semua sel
     df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
     return df
 
@@ -56,17 +56,32 @@ with col_judul:
 
 st.divider()
 
-# --- 5. LOGIN (SIDEBAR) ---
+# --- 5. LOGIKA PENUTUPAN LINK ---
+if not FORM_TERBUKA:
+    st.error("### 🛑 PEMBERITAHUAN: VERIFIKASI DITUTUP")
+    st.write("Masa verifikasi data TKA 2025 telah berakhir karena kuota responden telah terpenuhi 100%. Terima kasih atas partisipasi Anda.")
+    
+    # Panel Admin tetap bisa dibuka meski form ditutup (untuk download hasil akhir)
+    with st.expander("Panel Admin"):
+        pw = st.text_input("Password Admin", type="password")
+        if pw == "admin123":
+            st.write("### Rekapitulasi Akhir")
+            df_admin = muat_data_bersih()
+            st.dataframe(df_admin)
+            csv = df_admin.to_csv(index=False).encode('utf-8')
+            st.download_button("Download Rekap Akhir (CSV)", csv, "rekap_tka_final.csv", "text/csv")
+    st.stop() # Menghentikan proses kode di bawahnya agar form login tidak muncul
+
+# --- 6. LOGIN (SIDEBAR) ---
 with st.sidebar:
     st.header("Login Siswa")
     input_nis = st.text_input("Masukkan NIS").strip()
     input_tgl = st.text_input("Tanggal Lahir (YYYY-MM-DD)", placeholder="Contoh: 2008-05-10").strip()
 
-# --- 6. AREA VERIFIKASI ---
+# --- 7. AREA VERIFIKASI ---
 if input_nis and input_tgl:
     df_siswa = muat_data_bersih()
     
-    # Pencarian string yang presisi
     siswa = df_siswa[
         (df_siswa['nis'].astype(str) == str(input_nis)) & 
         (df_siswa['tgl_lahir'].astype(str) == str(input_tgl))
@@ -97,9 +112,7 @@ if input_nis and input_tgl:
             perbaikan_val = st.text_area("Detail Perbaikan:", value=val('catatan_perbaikan'))
         
         if st.button("SIMPAN KONFIRMASI"):
-            # Ambil data terbaru dari pusat
             df_final = muat_data_bersih()
-            # Cari ulang index-nya
             idx_f = df_final[df_final['nis'].astype(str) == str(input_nis)].index[0]
             
             if perbaikan_val.strip():
@@ -110,26 +123,15 @@ if input_nis and input_tgl:
                 df_final.at[idx_f, 'catatan_perbaikan'] = ""
             
             df_final.at[idx_f, 'waktu_akses'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            
-            # Update ke Google Sheets
             conn.update(spreadsheet=SHEET_URL, data=df_final)
             st.success("Berhasil disimpan! Anda bisa menutup halaman ini.")
-            # Efek balon dihapus sesuai permintaan
     else:
         st.error("Data tidak ditemukan. Cek NIS & format tanggal (YYYY-MM-DD).")
-        with st.expander("Bantuan Admin (Cek Data GSheet)"):
-            st.table(df_siswa[['nis', 'nama', 'tgl_lahir']].head(3))
 
-# --- 7. PANEL ADMIN (DENGAN PASSWORD) ---
-st.write("")
+# --- 8. PANEL ADMIN (JIKA FORM MASIH TERBUKA) ---
 st.write("")
 with st.expander("Panel Admin"):
-    pw = st.text_input("Password Admin", type="password")
+    pw = st.text_input("Password Admin", type="password", key="pw_bawah")
     if pw == "admin123":
-        st.write("### Rekapitulasi Verifikasi")
         df_admin = muat_data_bersih()
         st.dataframe(df_admin)
-        
-        csv = df_admin.to_csv(index=False).encode('utf-8')
-        st.download_button("Download CSV", csv, "rekap_tka.csv", "text/csv")
-
