@@ -8,7 +8,7 @@ import os
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1Vr8LdlC2COe-zqPKFyrtqMvGFUF3XbjhaOlfkGO-oz0/edit?usp=sharing"
 LOGO_FILE = "logo_sekolah.png"
 
-FORM_TERBUKA = False  # Ubah ke True untuk buka kembali
+FORM_TERBUKA = True  # Ubah ke True untuk buka kembali
 
 st.set_page_config(page_title="Verifikasi Data TKA", layout="centered")
 
