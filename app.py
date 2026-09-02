@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 import os
 
 #KONFIGURASI
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1Vr8LdlC2COe-zqPKFyrtqMvGFUF3XbjhaOlfkGO-oz0/edit?usp=sharing"
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1nljtizJIgcB1OPrag8XdaNDM-SAYiagnbLvvVRLSnYM/edit?usp=sharing"
 LOGO_FILE = "logo_sekolah.png"
 
 FORM_TERBUKA = True  # Ubah ke True untuk buka kembali
