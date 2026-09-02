@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -627,4 +626,3 @@ with st.expander("Panel Admin"):
             "rekap_verifikasi_tka.csv",
             "text/csv"
         )
-```
