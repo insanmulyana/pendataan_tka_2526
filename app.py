@@ -13,7 +13,7 @@ SHEET_URL = "https://docs.google.com/spreadsheets/d/1nljtizJIgcB1OPrag8XdaNDM-SA
 DATA_FILE = "data_siswa.xlsx"
 LOGO_FILE = "logo_sekolah.png"
 
-FORM_TERBUKA = False
+FORM_TERBUKA = True
 
 st.set_page_config(
     page_title="Verifikasi Data TKA",
@@ -218,12 +218,12 @@ st.divider()
 # FORM DITUTUP
 # =========================================================
 
-if not FORM_TERBUKA:
+if not FORM_TERBUKA:False
 
     st.error("### PEMBERITAHUAN: VERIFIKASI DITUTUP")
 
     st.write(
-        "Masa pengecekan data TKA 2025 telah berakhir, "
+        "Masa pengecekan data TKA 2026 telah berakhir, "
         "hubungi operator sekolah jika masih ada data "
         "yang salah. Terima kasih."
     )
