@@ -13,7 +13,7 @@ SHEET_URL = "https://docs.google.com/spreadsheets/d/1nljtizJIgcB1OPrag8XdaNDM-SA
 DATA_FILE = "data_siswa.xlsx"
 LOGO_FILE = "logo_sekolah.png"
 
-FORM_TERBUKA = True
+FORM_TERBUKA = False
 
 st.set_page_config(
     page_title="Verifikasi Data TKA",
@@ -218,7 +218,7 @@ st.divider()
 # FORM DITUTUP
 # =========================================================
 
-if not FORM_TERBUKA:False
+if not FORM_TERBUKA:
 
     st.error("### PEMBERITAHUAN: VERIFIKASI DITUTUP")
 
